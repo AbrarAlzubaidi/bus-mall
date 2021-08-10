@@ -110,6 +110,7 @@ function render() {
   Images.array[rightImgNumber].shown++;
 
   localStorage.data=JSON.stringify(Images.array);
+
 }
 
 function randomImg(min, max) {
