@@ -32,48 +32,27 @@ let rightImg = document.getElementById('rightImg');
 let initialValue = 0;
 let lastValue = 25;
 
-let currentImgs = [0, 0, 0];
-let nextImgs = [0, 0, 0];
-
 let leftImgNumber = 0;
 let centerImgNumber = 0;
 let rightImgNumber = 0;
 
-let nextLeftImgNumber=0;
-let nextCenterImgNumber=0;
-let nextRightImgNumber=0;
+let currentImg=[];
 
-function Images(name, path) { //constructor
+function Images(name, path, shown=0,click=0) { //constructor
   this.name = name;
   this.path = path;
-  this.shown = 0;
-  this.click = 0;
+  this.shown = shown;
+  this.click = click;
   Images.array.push(this);
 }
-
 Images.array = []; // array holds the objects which are imgs
 
-pushProperty();
+getDataToLocalStorage();// if we invoke it after pushProperty it will contains the refreshed result
 render();
-leftImgNumber = randomImg(0, imgs.length - 1);
-do {
-  centerImgNumber = randomImg(0, imgs.length - 1);
-  rightImgNumber = randomImg(0, imgs.length - 1);
-  
-} while (leftImgNumber === centerImgNumber || leftImgNumber === rightImgNumber || centerImgNumber === rightImgNumber);
-currentImgs = [leftImgNumber, centerImgNumber, rightImgNumber];
-leftImg.src = './img/' + Images.array[leftImgNumber].path;
-centerImg.src = './img/' + Images.array[centerImgNumber].path;
-rightImg.src = './img/' + Images.array[rightImgNumber].path;
-
-Images.array[leftImgNumber].shown++;
-Images.array[centerImgNumber].shown++;
-Images.array[rightImgNumber].shown++;
 
 mainSection.addEventListener('click', clickHandler);
 
 function clickHandler(event) {
-  checkArray();
   if ((event.target.id === 'leftImg' || event.target.id === 'centerImg' || event.target.id === 'rightImg') && initialValue < lastValue) {
     if (event.target.id === 'leftImg') {
       Images.array[leftImgNumber].click++;
@@ -112,49 +91,25 @@ function buttonHandler(event) {
   }
 }
 
-function assignImg() {
-  
-  //-------------------------------
-  nextLeftImgNumber = randomImg(0, imgs.length - 1);
-  do {
-    nextCenterImgNumber = randomImg(0, imgs.length - 1);
-    nextRightImgNumber = randomImg(0, imgs.length - 1);
-    nextImgs = [nextLeftImgNumber, nextCenterImgNumber, nextRightImgNumber];
-  } while (nextLeftImgNumber === nextCenterImgNumber || nextLeftImgNumber === nextRightImgNumber || nextCenterImgNumber === nextRightImgNumber);
-  console.log('next imgs' + nextImgs);
-}
-
-function checkArray(){
-  assignImg();
-  console.log('check function');
-  console.log('current in check '+currentImgs+ 'next in check '+nextImgs);
-  console.log(currentImgs.every((val)=> nextImgs.includes(val)));
-  while (currentImgs.every((val)=> nextImgs.includes(val))) {
-    console.log('while loop will print if arrays equal');
-    assignImg();
-  }
-  //render();
-
-}
-
-
 function render() {
-  assignImg();
-  checkArray();
+  do {
+    leftImgNumber = randomImg(0, imgs.length - 1);
+    centerImgNumber = randomImg(0, imgs.length - 1);
+    rightImgNumber = randomImg(0, imgs.length - 1);
 
-  if(currentImgs.sort().join(',') !== nextImgs.sort().join(',')){
-    console.log('if statement inside check');
-    leftImg.src = './img/' + Images.array[nextLeftImgNumber].path;
-    centerImg.src = './img/' + Images.array[nextCenterImgNumber].path;
-    rightImg.src = './img/' + Images.array[nextRightImgNumber].path;
+  } while (leftImgNumber === centerImgNumber || leftImgNumber === rightImgNumber || centerImgNumber === rightImgNumber ||
+     currentImg.includes(leftImgNumber) || currentImg.includes(centerImgNumber) || currentImg.includes(rightImgNumber));
 
-    Images.array[nextLeftImgNumber].shown++;
-    Images.array[nextCenterImgNumber].shown++;
-    Images.array[nextRightImgNumber].shown++;
-    currentImgs=nextImgs;
-    console.log('after doing if statement current in check '+currentImgs);
+  currentImg = [leftImgNumber, centerImgNumber, rightImgNumber];
+  leftImg.src = './img/' + Images.array[leftImgNumber].path;
+  centerImg.src = './img/' + Images.array[centerImgNumber].path;
+  rightImg.src = './img/' + Images.array[rightImgNumber].path;
 
-  }
+  Images.array[leftImgNumber].shown++;
+  Images.array[centerImgNumber].shown++;
+  Images.array[rightImgNumber].shown++;
+
+  localStorage.data=JSON.stringify(Images.array);
 }
 
 function randomImg(min, max) {
@@ -188,20 +143,20 @@ function chart() {
         label: '# of shows',
         data: shownArray,
         backgroundColor: [
-          'rgba(255, 99, 132, 0.2)',
+          '#464660',
         ],
         borderColor: [
-          'rgba(255, 99, 132, 1)',
+          'gray',
         ],
         borderWidth: 1
       },{
         label: '# of clicks',
         data:clickArray,
         backgroundColor: [
-          'rgba(54, 162, 235, 0.2)',
+          'gray',
         ],
         borderColor: [
-          'rgba(54, 162, 235, 1)',
+          '#464660',
         ],
         borderWidth: 1
       }
@@ -216,6 +171,19 @@ function chart() {
     }
   });
 }
+function getDataToLocalStorage(){
+  if(localStorage.data){ //if there is a data then do if statement 
+    let returnedData=JSON.parse(localStorage.data);// this returned obj is a literal obj so we need a way to change it to constructor.
+    console.log(returnedData);
+    for (let i = 0; i < returnedData.length; i++)// cause the returned data is an literal obj holds data
+    {
+      new Images(returnedData[i].name,returnedData[i].path, returnedData[i].shown, returnedData[i].click);
 
+    }
+  }else{ // if there is no data then create the objects (images).
+    pushProperty();
 
+  }
 
+}
+//localStorage.data='jhgfd';
